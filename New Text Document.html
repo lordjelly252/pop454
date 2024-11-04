@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام سهم - عارض ثلاثي الأبعاد</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: rgb(56, 56, 56);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #container3D {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    button  {
+      position: absolute;
+      display: block;
+      padding: 12px 20px;
+      background-color: rgba(86, 86, 86, 0.9);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 100;
+      transform: translate(-50%, -50%);
+      transition: all 0.1s ease;
+      font-size: 15px;
+      backdrop-filter: blur(5px);
+    }
+    button:hover {
+      background-color: #2980b9;
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+    .border {
+      background: linear-gradient(90deg, rgb(255, 255, 255), 90%, rgb(255, 255, 255));
+      height: 2px;
+      width: 40vw;
+      margin-top: 4px;
+      margin-right: 25%;
+    }
+    #heading {
+      position: fixed;
+      width: 100%;
+      padding: 32px;
+      text-align: right;
+      z-index: 1000;
+    }
+    h1 {
+      color: #ffffff;
+      margin-right: 40%;
+      font-size: 2.5em;
+    }
+    #controls  {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+    }
+    
+    .control-btn {
+      position: relative;
+      padding: 12px;
+      background-color: rgba(157, 157, 157, 0.9);
+      border-radius: 8px;
+      backdrop-filter: blur(5px);
+    }
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      color: white;
+      flex-direction: column;
+    }
+    .progress-bar {
+      width: 200px;
+      height: 10px;
+      background-color: #444;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    .progress {
+      width: 0%;
+      height: 100%;
+      background-color: #2980b9;
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      text-align: center;
+      backdrop-filter: blur(5px);
+    }
+    #tooltip {
+      position: fixed;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px;
+      border-radius: 4px;
+      display: none;
+      z-index: 1001;
+      pointer-events: none;
+    }
+        .sidebar {
+      position: fixed;
+      right: -400px;
+      top: 0;
+      width: 380px;
+      height: 100vh;
+      background-color: rgba(40, 40, 40, 0.95);
+      backdrop-filter: blur(10px);
+      transition: right 0.3s ease;
+      z-index: 1500;
+      padding: 20px;
+      color: white;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .sidebar.active {
+      right: 0;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .close-sidebar {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 5px;
+    }
+
+    .close-sidebar:hover {
+      color: #2980b9;
+      transform: scale(1.1);
+    }
+
+    .sidebar-content {
+      padding: 10px 0;
+    }
+
+    .point-info {
+      margin-bottom: 20px;
+    }
+
+    .point-info h3 {
+      color: #2980b9;
+      margin-bottom: 10px;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 1400;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+    #datetime {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: white;
+      font-size: 1.2em;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+      padding: 5px;
+      border-radius: 5px;
+    }
+    body {
+            margin: 0;
+            overflow: hidden;
+            background-color: rgb(56, 56, 56);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #container3D {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        button {
+            position: absolute;
+            display: block;
+            padding: 12px 20px;
+            background-color: rgba(86, 86, 86, 0.9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 100;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+            font-size: 15px;
+            backdrop-filter: blur(5px);
+        }
+        button:hover {
+            background-color: #2980b9;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        /* Additional styles for responsiveness */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5em; /* Adjust heading size for small screens */
+            }
+            .control-btn, #searchInput {
+                font-size: 12px; /* Smaller buttons on small screens */
+            }
+        }
+        /* Add any additional responsive styles here */
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <h2>جاري التحميل...</h2>
+    <div class="progress-bar">
+      <div class="progress"></div>
+    </div>
+  </div>
+  <div id="datetime"></div> <!-- Added datetime div -->
+
+  <div id="tooltip"></div>
+
+  <div id="heading">
+    <h1>نظام سهم</h1>
+    <div class="border"></div>
+  </div>
+
+  <div id="container3D"></div>
+
+  <div id="controls">
+
+    <button class="control-btn" id="resetView">إعادة ضبط المنظور</button>
+    <button class="control-btn" id="toggleFullscreen">ملء الشاشة</button>
+    <button class="control-btn" id="takeScreenshot">التقاط صورة</button>
+</div> 
+<div id="controls">
+   <input style="margin-top: -420%;" type="text" id="searchInput" placeholder="ابحث عن نقطة..." />
+    <button style="margin-top: 15%;margin-left: 50%;"  class="control-btn" id="searchButton">بحث</button>
+</div>
+<div >
+  <button id="button1" style="display: none;" onclick="window.location.href = 'Pages/index.html';">نقطة البداية</button>
+  <button id="button2" style="padding: 0px 0px;" onclick="window.location = 'Pages/index.html';"><img style="width: 25px;" src="LOGO/a59cce03-e052-4692-bf1d-64b0e9899422ebdcb2e7-a06d-49bf-851b-b91d1c526590.png"><img style="width: 25px;" src="LOGO/a59cce03-e052-4692-bf1d-64b0e989942290d1bf0c-68aa-4e36-8d14-306fa239cee0.png"></button>
+  <button id="button3" style="padding: 0px 0px;" oncliclk="window.location.href = 'Pages/index.html';"><img style="width: 25px;" src="LOGO/a59cce03-e052-4692-bf1d-64b0e98994222bd735ca-029b-4734-bea2-2a0c65d2b5dc.png"></button>
+  <button id="button4" style="padding: 0px 0px;" onclick="window.location.href = 'balcony.html';"> <img style="width: 25px;" src="LOGO/a59cce03-e052-4692-bf1d-64b0e9899422f5126b11-fd3f-4a2c-9485-7fdbe7c9517d.png"> </button>
+  <button id="button5" style="padding: 0px 0px;" onclick="window.location.href = 'entrance.html';"><img style="width: 25px;" src="LOGO/a59cce03-e052-4692-bf1d-64b0e9899422deb8a25d-c8a0-4f81-8fe5-70b3768365dd.png"></button>
+</div>
+
+  <!-- Add new HTML elements for sidebar -->
+  <div class="overlay"></div>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>معلومات النقطة</h2>
+      <button class="close-sidebar">×</button>
+    </div>
+    <div class="sidebar-content"></div>
+  </div>
+  <footer>
+    <p>في حالة وجود اي مشكلة الرجاء التواصل مع  مازن صانع بيت مستهيل /91188074</p>
+  </footer>
+
+  <script type="module">
+          import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
+        // Your existing JavaScript code goes here...
+
+        // Example of translation object
+        const translations = {
+            en: {
+                title: "Sahm System - 3D Viewer",
+                loading: "Loading...",
+                resetView: "Reset View",
+                toggleFullscreen: "Fullscreen",
+                takeScreenshot: "Take Screenshot",
+                searchPlaceholder: "Search for a point...",
+                searchButton: "Search"
+            },
+            ar: {
+                title: "نظام سهم - عارض ثلاثي الأبعاد",
+                loading: "جاري التحميل...",
+                resetView: "إعادة ضبط المنظور",
+                toggleFullscreen: "ملء الشاشة",
+                takeScreenshot: "التقاط صورة",
+                searchPlaceholder: "ابحث عن نقطة...",
+                searchButton: "بحث"
+            }
+        };
+
+        // Function to set language
+        function setLanguage(lang) {
+            document.title = translations[lang].title;
+            document.getElementById('searchInput').placeholder = translations[lang].searchPlaceholder;
+            document.getElementById('searchButton').innerText = translations[lang].searchButton;
+            // Update other text elements similarly
+        }
+
+        // Example usage
+        setLanguage('ar'); // or 'en' for English
+        // Reimport * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
+    import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js";
+    import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
+    
+    const pointsInfo = {
+      "نقطة البداية": {
+        description: "نقطة البداية للجولة في المبنى",
+        details: "موقع استراتيجي يتيح الوصول إلى جميع الأقسام الرئيسية",
+        features: ["إضاءة جيدة", "لوحات إرشادية", "منطقة استقبال"]
+      },
+      "حمام": {
+        description: "حمام حديث ومجهز بالكامل",
+        details: "مرافق صحية متكاملة مع تجهيزات عصرية",
+        features: ["إضاءة LED", "تهوية جيدة", "مرايا كبيرة"]
+      },
+      "atm": {
+        description: "جهاز صرف الي",
+        details: "اجهزة صرف الي من بنك مسقط و ظفار و صحار",
+        features: ["أريكة مريحة", "تلفاز كبير", "إضاءة قابلة للتعديل"]
+      },
+      "درجة": {
+        description: "درج يربط بين الطوابق",
+        details: "درج واسع مع درابزين آمن",
+        features: ["إضاءة تلقائية", "درابزين متين", "درجات مريحة"]
+      },
+      "مدخل vip": {
+        description: "المدخل الرئيسي للمبنى",
+        details: "بوابة رئيسية مع نظام أمان",
+        features: ["كاميرات مراقبة", "إضاءة خارجية", "لوحة إرشادات"]
+      }
+    };
+
+    // Function to show sidebar with point information
+    function showPointInfo(pointName) {
+      const info = pointsInfo[pointName];
+      if (!info) return;
+
+      const sidebarContent = document.querySelector('.sidebar-content');
+      sidebarContent.innerHTML = `
+        <div class="point-info">
+          <h3>${pointName}</h3>
+          <p>${info.description}</p>
+          <p>${info.details}</p>
+          <h4>المميزات:</h4>
+          <ul>
+            ${info.features.map(feature => `<li>${feature}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+
+      document.querySelector('.sidebar').classList.add('active');
+      document.querySelector('.overlay').classList.add('active');
+    }
+
+    // Modify search button click handler
+    document.getElementById('searchButton').addEventListener('click', () => {
+      const searchTerm = document.getElementById('searchInput').value.trim();
+      const point = points.find(p => p.name === searchTerm);
+
+      if (point) {
+        moveCameraToPoint(point.position);
+        showPointInfo(searchTerm);
+      } else {
+        alert('النقطة غير موجودة');
+      }
+    });
+
+    // Close sidebar when clicking the close button or overlay
+    document.querySelector('.close-sidebar').addEventListener('click', () => {
+      document.querySelector('.sidebar').classList.remove('active');
+      document.querySelector('.overlay').classList.remove('active');
+    });
+
+    document.querySelector('.overlay').addEventListener('click', () => {
+      document.querySelector('.sidebar').classList.remove('active');
+      document.querySelector('.overlay').classList.remove('active');
+    });
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    
+    let object;
+    const renderer = new THREE.WebGLRenderer({ 
+        alpha: true,
+        antialias: true,
+        preserveDrawingBuffer: true 
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.getElementById("container3D").appendChild(renderer.domElement);
+    
+    camera.position.set(50, 100, -100);
+    // Clear any directional light
+scene.clear();
+
+// Add an ambient light for uniform lighting across the scene
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Intensity 1 for full illumination
+scene.add(ambientLight);
+
+// Optional: Use a hemisphere light for gentle shading and even light
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0); // Sky and ground color
+scene.add(hemiLight);
+
+    
+    const points = [
+        { name: "نقطة البداية", position: new THREE.Vector3(-255, 5, 15), buttonId: 'button1' },
+        { name: "حمام", position: new THREE.Vector3(140, 0, 0), buttonId: 'button2' },
+        { name: "atm", position: new THREE.Vector3(45, 0, 30), buttonId: 'button3' },
+        { name: "درجة", position: new THREE.Vector3(150, 0, -50), buttonId: 'button4' },
+        { name: "مدخل vip", position: new THREE.Vector3(15, 0, -40), buttonId: 'button5' }
+    ];
+    
+    // Loading manager for progress tracking
+    const loadingManager = new THREE.LoadingManager();
+    const progressBar = document.querySelector('.progress');
+    const loadingScreen = document.getElementById('loading-screen');
+    
+    loadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
+        const progress = (itemsLoaded / itemsTotal) * 100;
+        progressBar.style.width = progress + '%';
+    };
+    
+    loadingManager.onLoad = function() {
+        loadingScreen.style.display = 'none';
+    };
+    // Animation mixer
+let mixer;
+
+// Load model
+const loader = new GLTFLoader(loadingManager);
+loader.load(
+  'New folder (3)/معرض .gltf',
+  function (gltf) {
+    object = gltf.scene;
+    object.traverse((node) => {
+      if (node.isMesh) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+      }
+    });
+    scene.add(object);
+
+    // Create an animation mixer
+    mixer = new THREE.AnimationMixer(object);
+    gltf.animations.forEach((clip) => {
+      mixer.clipAction(clip).play(); // Start playing all animations
+    });
+
+    addNamedPoints();
+  },
+  function(xhr) {
+    // Loading progress handled by loading manager
+  },
+  function (error) {
+    console.error(error);
+    alert('حدث خطأ أثناء تحميل النموذج');
+  }
+);
+    
+
+// Enhanced point visualization
+function addNamedPoints() {
+  points.forEach(point => {
+    const markerGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+    const markerMaterial = new THREE.MeshPhongMaterial({ 
+      color: 0xff0000,
+      emissive: 0xff0000,
+      emissiveIntensity: 0.2
+    });
+    const sphere = new THREE.Mesh(markerGeometry, markerMaterial);
+    sphere.position.copy(point.position);
+    scene.add(sphere);
+    
+    // Show button
+    const button = document.getElementById(point.buttonId);
+    button.style.display = 'block';
+    updateButtonPosition(point.position, button);
+
+    // Add event listener for button click
+    button.addEventListener('click', () => {
+      moveCameraToPoint(point.position);
+      showPointInfo(point.name);
+    });
+  });
+}
+
+    
+    // Update button position
+    function updateButtonPosition(position, button) {
+        const vector = position.clone().project(camera);
+        const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+        const y = -(vector.y * 0.5 - 0.5) * window.innerHeight;
+        button.style.left = `${x}px`;
+        button.style.top = `${y}px`;
+    }
+    
+    // Move camera to a specified point
+    function moveCameraToPoint(targetPosition) {
+        const duration = 1000; // duration of the movement in milliseconds
+        const startPosition = camera.position.clone();
+        const startTime = performance.now();
+    
+        function animateCamera() {
+            const elapsed = performance.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+    
+            // Interpolate the camera's position
+            camera.position.lerpVectors(startPosition, targetPosition, progress);
+    
+            // If the movement is not complete, continue the animation
+            if (progress < 1) {
+                requestAnimationFrame(animateCamera);
+            } else {
+                // Point the camera at the target position
+                controls.target.copy(targetPosition);
+                controls.update();
+            }
+        }
+    
+        animateCamera();
+    }
+    
+    // Search button functionality
+    document.getElementById('searchButton').addEventListener('click', () => {
+        const searchTerm = document.getElementById('searchInput').value.trim();
+        const point = points.find(p => p.name === searchTerm);
+    
+        if (point) {
+            moveCameraToPoint(point.position);
+        } else {
+            alert('النقطة غير موجودة'); // Point not found
+        }
+    });
+    
+    // Enhanced controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.1;
+    controls.enablePan = true;
+    controls.minDistance = 50;
+    controls.maxDistance = 500;
+    controls.maxPolarAngle = Math.PI / 1.5;
+    
+    // Reset camera view
+    document.getElementById('resetView').addEventListener('click', () => {
+        camera.position.set(50, 50, 50);
+        controls.target.set(0, 0, 0);
+        controls.update();
+    });
+    
+    // Fullscreen toggle
+    document.getElementById('toggleFullscreen').addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    });
+    
+    // Screenshot functionality
+    document.getElementById('takeScreenshot').addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'screenshot.png';
+        link.href = renderer.domElement.toDataURL('image/png');
+        link.click();
+    });
+    
+// Animation loop
+const animate = () => {
+  requestAnimationFrame(animate);
+  
+  // Update mixer if it exists
+  if (mixer) {
+    mixer.update(0.01); // Adjust the delta time as needed
+  }
+
+  points.forEach(point => {
+    const button = document.getElementById(point.buttonId);
+    updateButtonPosition(point.position, button);
+  });
+
+  controls.update();
+  renderer.render(scene, camera);
+};
+    
+    animate();
+    
+    // Enhanced resize handling
+    window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    window.onload = function () {
+      const loadingScreen = document.getElementById('loading-screen');
+      const progressBar = document.querySelector('.progress');
+      const totalAssets = 5; // Example total assets, adjust based on your assets
+      let loadedAssets = 0;
+
+      // Simulate loading process
+      const interval = setInterval(() => {
+        loadedAssets++;
+        const progressPercentage = (loadedAssets / totalAssets) * 100;
+        progressBar.style.width = `${progressPercentage}%`;
+
+        if (loadedAssets === totalAssets) {
+          clearInterval(interval);
+          loadingScreen.style.display = 'none';
+        }
+      }, 1000); // Simulate loading every second
+
+      // Update current date and time
+      function updateDateTime() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+        document.getElementById('datetime').innerText = now.toLocaleString('ar-SA', options);
+      }
+
+      updateDateTime();
+      setInterval(updateDateTime, 1000); // Update every second
+    };
+    
+  </script>
+  
+</body>
+</html>
